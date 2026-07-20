@@ -5,17 +5,19 @@ import json
 from biorxiv_search.application import PreprintSearchService
 from biorxiv_search.domain.errors import SearcherError
 from biorxiv_search.infrastructure.biorxiv import BiorxivClient
+from biorxiv_search.infrastructure.cache import SQLiteCache
 from biorxiv_search.infrastructure.europe_pmc import EuropePmcClient
 from biorxiv_search.infrastructure.http import PoliteHttpClient
 
 
-def build_service() -> tuple[PreprintSearchService, PoliteHttpClient]:
+def build_service(cache_path: str) -> tuple[PreprintSearchService, PoliteHttpClient, SQLiteCache]:
     http = PoliteHttpClient(user_agent="biorxiv-searcher/0.1 (local research tool)")
-    return PreprintSearchService(EuropePmcClient(http), BiorxivClient(http)), http
+    cache = SQLiteCache(cache_path)
+    return PreprintSearchService(EuropePmcClient(http), BiorxivClient(http), cache), http, cache
 
 
 async def run(args: argparse.Namespace) -> None:
-    service, http = build_service()
+    service, http, cache = build_service(args.cache)
     try:
         if args.command == "search":
             result = await service.search_preprints(args.query, limit=args.limit)
@@ -24,6 +26,7 @@ async def run(args: argparse.Namespace) -> None:
         print(json.dumps(_jsonable(result), ensure_ascii=False, indent=2))
     finally:
         await http.aclose()
+        cache.close()
 
 
 def _jsonable(value):
@@ -49,8 +52,10 @@ def main() -> None:
     search = subparsers.add_parser("search")
     search.add_argument("query")
     search.add_argument("--limit", type=int, default=20)
+    search.add_argument("--cache", default=".biorxiv-searcher.sqlite3")
     detail = subparsers.add_parser("detail")
     detail.add_argument("doi")
+    detail.add_argument("--cache", default=".biorxiv-searcher.sqlite3")
     try:
         asyncio.run(run(parser.parse_args()))
     except SearcherError as exc:
