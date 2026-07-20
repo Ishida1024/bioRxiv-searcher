@@ -12,6 +12,7 @@ English: [README.md](README.md)
 - タイムアウト、リトライ、レート制御、小規模な SQLite TTL キャッシュ
 - Python サービス API と CLI アダプター
 - MCP をコア依存にしない拡張可能な境界
+- 依存関係とテストを検証する GitHub Actions CI
 
 検索結果の出典と詳細情報の正本を、返却モデル上で明示的に分離しています。検索結果は Europe PMC による発見用メタデータであり、bioRxiv 全件の網羅性を保証するものではありません。
 

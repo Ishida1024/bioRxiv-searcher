@@ -12,6 +12,7 @@ Search bioRxiv metadata with Europe PMC and fetch authoritative details from the
 - Timeout, retry, rate limiting, and a small SQLite TTL cache
 - Python service API and a small CLI adapter
 - MCP-ready application boundaries without making MCP a core dependency
+- GitHub Actions CI for dependency and test verification
 
 The search result source and the authoritative detail source are kept explicit in the returned models. Search results are discovery metadata from Europe PMC; they are not a completeness guarantee for all bioRxiv records.
 
