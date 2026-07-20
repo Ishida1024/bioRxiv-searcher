@@ -65,8 +65,9 @@ async def search_preprints(
 入力制約:
 
 - `query` は空文字を拒否し、最大 500 文字とする
+- `author` は指定時に最大 200 文字とする
 - `limit` は 1〜50 とする
-- `cursor` は不透明値として扱い、クライアントが内容を解釈してはならない
+- `cursor` は不透明値として扱い、クライアントが内容を解釈してはならない。最大 1000 文字とする
 - 日付は ISO 8601 の `YYYY-MM-DD` とする
 - `date_from > date_to` は入力エラーとする
 - `title_only=True` のときは Europe PMC の `TITLE`、それ以外は `TITLE_ABS` を使う

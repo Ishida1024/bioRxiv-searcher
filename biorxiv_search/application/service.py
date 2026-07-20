@@ -1,3 +1,4 @@
+import asyncio
 from datetime import date, datetime, timedelta, timezone
 import hashlib
 import json
@@ -20,6 +21,7 @@ class PreprintSearchService:
         self._search_provider = search_provider
         self._detail_provider = detail_provider
         self._cache = cache
+        self._inflight: dict[str, asyncio.Task] = {}
 
     async def search_preprints(
         self,
@@ -32,20 +34,23 @@ class PreprintSearchService:
         limit: int = 20,
         cursor: str | None = None,
     ) -> SearchPage:
-        _validate_search(query, date_from, date_to, limit)
+        _validate_search(query, author, date_from, date_to, limit, cursor)
         key = _key("search", query, title_only, author, date_from, date_to, limit, cursor)
         if self._cache:
             cached = self._cache.get(key)
             if cached:
                 return _search_page_from_json(cached.payload)
-        page = await self._search_provider.search(
-            query,
-            title_only=title_only,
-            author=author,
-            date_from=date_from,
-            date_to=date_to,
-            limit=limit,
-            cursor=cursor,
+        page = await self._coalesced(
+            key,
+            lambda: self._search_provider.search(
+                query,
+                title_only=title_only,
+                author=author,
+                date_from=date_from,
+                date_to=date_to,
+                limit=limit,
+                cursor=cursor,
+            ),
         )
         if self._cache:
             now = datetime.now(timezone.utc)
@@ -61,18 +66,47 @@ class PreprintSearchService:
             cached = self._cache.get(key)
             if cached:
                 return _detail_from_json(cached.payload)
-        detail = await self._detail_provider.get_by_doi(normalized, version=version)
+        detail = await self._coalesced(
+            key,
+            lambda: self._detail_provider.get_by_doi(normalized, version=version),
+        )
         if self._cache:
             now = datetime.now(timezone.utc)
             self._cache.set(key, "biorxiv_api", _jsonable(detail), now + timedelta(hours=12))
         return detail
 
+    async def _coalesced(self, key: str, operation):
+        task = self._inflight.get(key)
+        if task is None:
+            task = asyncio.create_task(operation())
+            self._inflight[key] = task
+        try:
+            return await asyncio.shield(task)
+        finally:
+            if task.done() and self._inflight.get(key) is task:
+                del self._inflight[key]
 
-def _validate_search(query: str, date_from: date | None, date_to: date | None, limit: int) -> None:
+
+def _validate_search(
+    query: str,
+    author: str | None,
+    date_from: date | None,
+    date_to: date | None,
+    limit: int,
+    cursor: str | None,
+) -> None:
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise InvalidInputError("query must contain 1 to 500 characters")
+    if author is not None and (not isinstance(author, str) or len(author) > 200):
+        raise InvalidInputError("author must contain at most 200 characters")
     if not 1 <= limit <= 50:
         raise InvalidInputError("limit must be between 1 and 50")
+    if cursor is not None and (not isinstance(cursor, str) or len(cursor) > 1000):
+        raise InvalidInputError("cursor must contain at most 1000 characters")
+    if date_from is not None and not isinstance(date_from, date):
+        raise InvalidInputError("date_from must be a date")
+    if date_to is not None and not isinstance(date_to, date):
+        raise InvalidInputError("date_to must be a date")
     if date_from and date_to and date_from > date_to:
         raise InvalidInputError("date_from must not be later than date_to")
 
