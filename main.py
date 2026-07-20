@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import json
+import sys
 
 from biorxiv_search.application import PreprintSearchService
 from biorxiv_search.domain.errors import SearcherError
@@ -59,7 +60,13 @@ def main() -> None:
     try:
         asyncio.run(run(parser.parse_args()))
     except SearcherError as exc:
-        print(json.dumps({"error": {"code": exc.code, "message": exc.message, "retryable": exc.retryable}}, ensure_ascii=False))
+        print(
+            json.dumps(
+                {"error": {"code": exc.code, "message": exc.message, "retryable": exc.retryable}},
+                ensure_ascii=False,
+            ),
+            file=sys.stderr,
+        )
         raise SystemExit(1) from exc
 
 

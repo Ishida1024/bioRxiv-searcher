@@ -25,7 +25,7 @@ class BiorxivClient:
             raise NotFoundError("bioRxiv preprint was not found", provider=self.provider)
         records = [item for item in collection if isinstance(item, dict)]
         if version is not None:
-            records = [item for item in records if item.get("version") == version]
+            records = [item for item in records if _as_int(item.get("version")) == version]
         if not records:
             raise NotFoundError("Requested bioRxiv version was not found", provider=self.provider)
         record = max(records, key=lambda item: int(item.get("version", 0)))
@@ -72,6 +72,13 @@ def _authors(value: object) -> tuple[str, ...]:
         return ()
     separator = ";" if ";" in value else ","
     return tuple(part.strip() for part in value.split(separator) if part.strip())
+
+
+def _as_int(value: object) -> int | None:
+    try:
+        return int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
 
 
 def _funding(value: object) -> tuple[Funding, ...]:
