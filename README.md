@@ -57,6 +57,10 @@ uv run pytest -q
 
 The formal architecture and API contract are documented in [DESIGN.md](DESIGN.md).
 
+## License
+
+MIT. See [LICENSE](LICENSE).
+
 ## Data and operational notes
 
 - bioRxiv web pages are not scraped.

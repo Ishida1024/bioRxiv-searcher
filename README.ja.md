@@ -57,6 +57,10 @@ uv run pytest -q
 
 正式なアーキテクチャと API 契約は [DESIGN.md](DESIGN.md) に記載しています。
 
+## ライセンス
+
+MIT License。詳細は [LICENSE](LICENSE) を参照してください。
+
 ## データと運用上の注意
 
 - bioRxiv の Web ページはスクレイピングしません。

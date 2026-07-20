@@ -3,6 +3,7 @@ name = "biorxiv-searcher"
 version = "0.1.0"
 description = "Search bioRxiv metadata through Europe PMC and the bioRxiv API"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.14"
 dependencies = [
     "httpx>=0.28.1",
