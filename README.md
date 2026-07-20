@@ -34,6 +34,7 @@ uv run python main.py search "single-cell" --limit 5
 
 # Fetch authoritative metadata from bioRxiv by DOI
 uv run python main.py detail 10.1101/2026.01.01.123456
+```
 
 The CLI stores short-lived responses in `.biorxiv-searcher.sqlite3`. Use `--cache PATH` to choose another cache location:
 

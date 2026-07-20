@@ -34,6 +34,7 @@ uv run python main.py search "single-cell" --limit 5
 
 # DOI から bioRxiv 公式 API の詳細情報を取得
 uv run python main.py detail 10.1101/2026.01.01.123456
+```
 
 CLI は短期間のレスポンスを `.biorxiv-searcher.sqlite3` にキャッシュします。保存先を変更する場合は `--cache PATH` を指定してください。
 
