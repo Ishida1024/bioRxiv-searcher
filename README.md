@@ -22,13 +22,15 @@ The search result source and the authoritative detail source are kept explicit i
 
 ## Usage
 
+Choose one setup method below, then use the matching command runner.
+
 ### Setup with uv
 
 ```bash
 uv sync
 ```
 
-### Setup with requirements.txt
+### Setup with venv and requirements.txt
 
 ```bash
 python3 -m venv .venv
@@ -48,17 +50,22 @@ uv run python main.py search "single-cell" --limit 5
 uv run python main.py detail 10.1101/2026.01.01.123456
 ```
 
-When using `requirements.txt`, run the commands with the activated virtual environment:
+Run with venv:
 
 ```bash
-python main.py search "single-cell" --limit 5
+source .venv/bin/activate
+python main.py search "protein folding" --limit 5
 python main.py detail 10.1101/2026.01.01.123456
 ```
 
 The CLI stores short-lived responses in `.biorxiv-searcher.sqlite3`. Use `--cache PATH` to choose another cache location:
 
 ```bash
+# uv
 uv run python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
+
+# venv
+python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
 ```
 
 ## Python API

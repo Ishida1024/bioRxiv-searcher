@@ -22,13 +22,15 @@ English: [README.md](README.md)
 
 ## 使い方
 
+次のセットアップ方法から1つを選び、対応するコマンドで実行してください。
+
 ### uv を使う場合
 
 ```bash
 uv sync
 ```
 
-### requirements.txt を使う場合
+### venv と requirements.txt を使う場合
 
 ```bash
 python3 -m venv .venv
@@ -48,7 +50,7 @@ uv run python main.py search "single-cell" --limit 5
 uv run python main.py detail 10.1101/2026.01.01.123456
 ```
 
-`requirements.txt` を使う場合は、仮想環境を有効化した状態で実行します。
+venv を使う場合:
 
 ```bash
 python main.py search "single-cell" --limit 5
@@ -58,7 +60,11 @@ python main.py detail 10.1101/2026.01.01.123456
 CLI は短期間のレスポンスを `.biorxiv-searcher.sqlite3` にキャッシュします。保存先を変更する場合は `--cache PATH` を指定してください。
 
 ```bash
+# uv
 uv run python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
+
+# venv
+python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
 ```
 
 ## Python API
