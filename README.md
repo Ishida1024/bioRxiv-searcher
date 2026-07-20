@@ -22,14 +22,37 @@ The search result source and the authoritative detail source are kept explicit i
 
 ## Usage
 
+### Setup with uv
+
 ```bash
 uv sync
+```
+
+### Setup with requirements.txt
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Run with uv:
+
+```bash
 
 # Search Europe PMC's bioRxiv index
 uv run python main.py search "single-cell" --limit 5
 
 # Fetch authoritative metadata from bioRxiv by DOI
 uv run python main.py detail 10.1101/2026.01.01.123456
+```
+
+When using `requirements.txt`, run the commands with the activated virtual environment:
+
+```bash
+python main.py search "single-cell" --limit 5
+python main.py detail 10.1101/2026.01.01.123456
 ```
 
 The CLI stores short-lived responses in `.biorxiv-searcher.sqlite3`. Use `--cache PATH` to choose another cache location:
