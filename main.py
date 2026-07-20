@@ -3,6 +3,7 @@ import asyncio
 import json
 
 from biorxiv_search.application import PreprintSearchService
+from biorxiv_search.domain.errors import SearcherError
 from biorxiv_search.infrastructure.biorxiv import BiorxivClient
 from biorxiv_search.infrastructure.europe_pmc import EuropePmcClient
 from biorxiv_search.infrastructure.http import PoliteHttpClient
@@ -50,7 +51,11 @@ def main() -> None:
     search.add_argument("--limit", type=int, default=20)
     detail = subparsers.add_parser("detail")
     detail.add_argument("doi")
-    asyncio.run(run(parser.parse_args()))
+    try:
+        asyncio.run(run(parser.parse_args()))
+    except SearcherError as exc:
+        print(json.dumps({"error": {"code": exc.code, "message": exc.message, "retryable": exc.retryable}}, ensure_ascii=False))
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":

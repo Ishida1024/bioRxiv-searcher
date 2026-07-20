@@ -1,8 +1,10 @@
 from urllib.parse import unquote, urlparse
+import re
 
 from .errors import InvalidInputError
 
 _MAX_DOI_LENGTH = 500
+_DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
 
 
 def normalize_doi(value: str) -> str:
@@ -23,8 +25,6 @@ def normalize_doi(value: str) -> str:
     elif lowered.startswith("doi:"):
         doi = doi[4:].strip()
 
-    if not doi.lower().startswith("10.1101/") or len(doi) <= len("10.1101/"):
-        raise InvalidInputError("DOI must be a bioRxiv DOI beginning with 10.1101/")
-    if any(char.isspace() for char in doi):
-        raise InvalidInputError("DOI must not contain whitespace")
+    if not _DOI_PATTERN.fullmatch(doi):
+        raise InvalidInputError("DOI must use a valid DOI prefix and suffix")
     return doi

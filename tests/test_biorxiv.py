@@ -10,7 +10,7 @@ class FakeHttp:
                 {
                     "doi": "10.1101/2026.01.01.123456",
                     "title": "A title",
-                    "authors": "Jane Doe, John Doe",
+                    "authors": "Jane Doe; John Doe",
                     "author_corresponding": "Jane Doe",
                     "date": "2026-01-02",
                     "version": 1,

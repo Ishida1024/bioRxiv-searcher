@@ -17,7 +17,7 @@ class BiorxivClient:
 
     async def get_by_doi(self, doi: str, *, version: int | None = None) -> PreprintDetail:
         normalized = normalize_doi(doi)
-        url = f"{BASE_URL}/details/biorxiv/{quote(normalized, safe='')}/na/json"
+        url = f"{BASE_URL}/details/biorxiv/{quote(normalized, safe='/')}/na/json"
         payload = await self._http.request_json("GET", url)
         collection = payload.get("collection")
         if not isinstance(collection, list) or not collection:
@@ -63,13 +63,14 @@ class BiorxivClient:
 
 
 def _optional(value: object) -> str | None:
-    return str(value) if value not in (None, "") else None
+    return str(value) if value not in (None, "", "NA", "N/A") else None
 
 
 def _authors(value: object) -> tuple[str, ...]:
     if not isinstance(value, str):
         return ()
-    return tuple(part.strip() for part in value.split(",") if part.strip())
+    separator = ";" if ";" in value else ","
+    return tuple(part.strip() for part in value.split(separator) if part.strip())
 
 
 def _funding(value: object) -> tuple[Funding, ...]:

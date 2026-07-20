@@ -106,8 +106,11 @@ def _search_page_from_json(data: dict) -> SearchPage:
 
     items = tuple(
         PreprintSummary(
-            **item,
-            posted_date=date.fromisoformat(item["posted_date"]) if item["posted_date"] else None,
+            **{
+                **item,
+                "authors": tuple(item["authors"]),
+                "posted_date": date.fromisoformat(item["posted_date"]) if item["posted_date"] else None,
+            }
         )
         for item in data["items"]
     )
