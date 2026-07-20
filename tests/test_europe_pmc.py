@@ -58,7 +58,7 @@ async def test_search_maps_europe_pmc_result():
                         "id": "123",
                         "source": "BIOPR",
                         "doi": "10.1101/2026.01.01.123456",
-                        "title": "A title",
+                        "title": "A <i>title</i>",
                         "abstractText": "<h4>Abstract</h4> An abstract",
                         "authorList": {"author": [{"fullName": "Jane Doe"}]},
                         "firstPublicationDate": "2026-01-02",
@@ -69,6 +69,7 @@ async def test_search_maps_europe_pmc_result():
     )
     page = await EuropePmcClient(http).search("title")
     assert page.total == 1
+    assert page.items[0].title == "A title"
     assert page.items[0].authors == ("Jane Doe",)
     assert page.items[0].abstract == "Abstract An abstract"
     assert page.items[0].version is None

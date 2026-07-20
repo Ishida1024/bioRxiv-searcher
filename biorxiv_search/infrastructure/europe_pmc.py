@@ -131,7 +131,7 @@ class EuropePmcClient:
                 posted_date = None
         return PreprintSummary(
             doi=doi,
-            title=str(item.get("title", "")),
+            title=clean_external_text(item.get("title")) or "",
             authors=names,
             abstract=clean_external_text(item.get("abstractText")),
             posted_date=posted_date,
