@@ -17,7 +17,7 @@ class FakeHttp:
                     "type": "new results",
                     "license": "cc_by",
                     "category": "Genomics",
-                    "abstract": "An abstract",
+                    "abstract": "<h4>Abstract</h4> An abstract",
                     "funding": [{"name": "NIH", "id": "1", "id-type": "grant", "award": "A"}],
                     "published": "",
                     "jats xml path": "https://example.org/article.xml",
@@ -33,3 +33,4 @@ async def test_get_by_doi_maps_detail():
     assert detail.version == 1
     assert detail.authors == ("Jane Doe", "John Doe")
     assert detail.funding[0].identifier == "1"
+    assert detail.abstract == "Abstract An abstract"

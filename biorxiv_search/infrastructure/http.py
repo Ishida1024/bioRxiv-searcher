@@ -1,7 +1,6 @@
 import asyncio
 import random
 import time
-from collections.abc import Mapping
 from email.utils import parsedate_to_datetime
 from typing import Any
 
@@ -24,7 +23,10 @@ class PoliteHttpClient:
         min_interval: float = 0.1,
         max_retries: int = 2,
     ) -> None:
-        self._client = client or httpx.AsyncClient()
+        self._client = client or httpx.AsyncClient(
+            timeout=httpx.Timeout(30.0, connect=5.0),
+            limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
+        )
         self._owns_client = client is None
         self._user_agent = user_agent
         self._min_interval = min_interval

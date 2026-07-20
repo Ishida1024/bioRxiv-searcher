@@ -72,7 +72,7 @@ async def search_preprints(
 - `title_only=True` のときは Europe PMC の `TITLE`、それ以外は `TITLE_ABS` を使う
 - bioRxiv 限定条件は必ず検索式に含める
 
-検索式の基本形:
+検索式の基本形。通常の空白区切り語は AND 相当で検索し、二重引用符で囲んだ部分はフレーズとして扱う。入力中の単独の `AND` と `OR` だけを演算子として認識し、それ以外の Europe PMC 構文や特殊文字は検索語データとしてエスケープする。
 
 ```text
 PUBLISHER:"bioRxiv" AND TITLE_ABS:(<query>)

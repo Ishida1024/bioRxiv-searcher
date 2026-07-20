@@ -5,6 +5,7 @@ from .http import PoliteHttpClient
 from ..domain.errors import NotFoundError, UpstreamProtocolError
 from ..domain.identifiers import normalize_doi
 from ..domain.models import Funding, PreprintDetail
+from ..domain.text import clean_external_text
 
 BASE_URL = "https://api.biorxiv.org"
 
@@ -52,7 +53,7 @@ class BiorxivClient:
             document_type=_optional(item.get("type")),
             license=_optional(item.get("license")),
             category=_optional(item.get("category")),
-            abstract=str(item["abstract"]),
+            abstract=clean_external_text(item["abstract"]) or "",
             funding=_funding(item.get("funding")),
             published_doi=_optional(item.get("published")),
             jats_xml_url=_optional(item.get("jats xml path")),

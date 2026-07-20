@@ -1,15 +1,43 @@
 from datetime import date
-from urllib.parse import quote
-
+import re
 from .http import PoliteHttpClient
 from ..domain.errors import UpstreamProtocolError
 from ..domain.models import PreprintSummary, SearchPage
+from ..domain.text import clean_external_text
 
 BASE_URL = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 
 def _escape_query(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _text_expression(value: str, field: str) -> str:
+    """Build a safe expression for whitespace-separated keyword terms.
+
+    Quoted phrases are preserved, so a query can explicitly request phrase
+    matching while ordinary multi-word queries remain useful keyword searches.
+    Only standalone AND/OR tokens are treated as operators; all other input
+    is quoted as data rather than passed through as Europe PMC syntax.
+    """
+    tokens = re.findall(r'"[^"\\]*(?:\\.[^"\\]*)*"|\S+', value)
+    groups: list[list[str]] = [[]]
+    for token in tokens:
+        if token.upper() == "OR" and groups[-1]:
+            groups.append([])
+            continue
+        if token.upper() == "AND":
+            continue
+        if len(token) >= 2 and token[0] == '"' and token[-1] == '"':
+            phrase = token[1:-1]
+            groups[-1].append(f'"{_escape_query(phrase)}"')
+        else:
+            groups[-1].append(f'"{_escape_query(token)}"')
+    groups = [group for group in groups if group]
+    if not groups:
+        return f'{field}:""'
+    expressions = [f"{field}:({' '.join(group)})" for group in groups]
+    return expressions[0] if len(expressions) == 1 else f"({' OR '.join(expressions)})"
 
 
 def build_search_query(
@@ -21,7 +49,7 @@ def build_search_query(
     date_to: date | None = None,
 ) -> str:
     field = "TITLE" if title_only else "TITLE_ABS"
-    parts = [f'PUBLISHER:"bioRxiv"', f'{field}:"{_escape_query(query)}"']
+    parts = [f'PUBLISHER:"bioRxiv"', _text_expression(query, field)]
     if author:
         parts.append(f'AUTH:"{_escape_query(author)}"')
     if date_from or date_to:
@@ -84,7 +112,8 @@ class EuropePmcClient:
         if not isinstance(doi, str) or not doi:
             raise UpstreamProtocolError("Europe PMC result has no DOI", provider="europe_pmc")
         authors = item.get("authorString") or ""
-        author_list = item.get("authorList", {}).get("author", [])
+        author_data = item.get("authorList")
+        author_list = author_data.get("author", []) if isinstance(author_data, dict) else []
         if isinstance(author_list, list):
             names = tuple(
                 author.get("fullName", "").strip()
@@ -104,11 +133,18 @@ class EuropePmcClient:
             doi=doi,
             title=str(item.get("title", "")),
             authors=names,
-            abstract=item.get("abstractText"),
+            abstract=clean_external_text(item.get("abstractText")),
             posted_date=posted_date,
-            version=item.get("version") if isinstance(item.get("version"), int) else None,
+            version=_as_int(item.get("version")),
             source="europe_pmc",
             source_record_id=str(item.get("id", "")),
             source_url=f"https://europepmc.org/article/{item.get('source', 'MED')}/{item.get('id', '')}",
             latest_version_only=True,
         )
+
+
+def _as_int(value: object) -> int | None:
+    try:
+        return int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None

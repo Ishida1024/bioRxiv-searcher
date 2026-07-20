@@ -13,7 +13,11 @@ class CacheEntry:
 
 class SQLiteCache:
     def __init__(self, path: str | Path = ":memory:") -> None:
+        if path != ":memory:":
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
         self._connection = sqlite3.connect(path)
+        self._connection.execute("PRAGMA busy_timeout = 5000")
+        self._connection.execute("PRAGMA journal_mode = WAL")
         self._connection.execute(
             """CREATE TABLE IF NOT EXISTS http_cache (
                 cache_key TEXT PRIMARY KEY,
@@ -34,11 +38,19 @@ class SQLiteCache:
         ).fetchone()
         if row is None:
             return None
-        expires_at = datetime.fromisoformat(row[1])
+        try:
+            expires_at = datetime.fromisoformat(row[1])
+            payload = json.loads(row[0])
+        except (ValueError, TypeError, json.JSONDecodeError):
+            self.delete(key)
+            return None
         if expires_at <= current:
             self.delete(key)
             return None
-        return CacheEntry(json.loads(row[0]), expires_at)
+        if not isinstance(payload, dict):
+            self.delete(key)
+            return None
+        return CacheEntry(payload, expires_at)
 
     def set(
         self,
