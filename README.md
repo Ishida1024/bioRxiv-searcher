@@ -79,6 +79,8 @@ uv run pytest -q
 
 The formal architecture and API contract are documented in [DESIGN.md](DESIGN.md).
 
+For a Codex-oriented instruction file template, see [AGENTS.template.md](AGENTS.template.md).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

@@ -79,6 +79,8 @@ uv run pytest -q
 
 正式なアーキテクチャと API 契約は [DESIGN.md](DESIGN.md) に記載しています。
 
+Codex 用の指示ファイルテンプレートは [AGENTS.template.md](AGENTS.template.md) を参照してください。
+
 ## ライセンス
 
 MIT License。詳細は [LICENSE](LICENSE) を参照してください。
