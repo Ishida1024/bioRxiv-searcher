@@ -22,49 +22,40 @@ The search result source and the authoritative detail source are kept explicit i
 
 ## Usage
 
-Choose one setup method below, then use the matching command runner.
+Choose one of the following setup methods.
 
-### Setup with uv
+### uv
 
 ```bash
 uv sync
-```
-
-### Setup with venv and requirements.txt
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Run with uv:
-
-```bash
 
 # Search Europe PMC's bioRxiv index
 uv run python main.py search "single-cell" --limit 5
 
 # Fetch authoritative metadata from bioRxiv by DOI
 uv run python main.py detail 10.1101/2026.01.01.123456
-```
-
-Run with venv:
-
-```bash
-source .venv/bin/activate
-python main.py search "protein folding" --limit 5
-python main.py detail 10.1101/2026.01.01.123456
-```
 
 The CLI stores short-lived responses in `.biorxiv-searcher.sqlite3`. Use `--cache PATH` to choose another cache location:
 
 ```bash
-# uv
 uv run python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
+```
 
-# venv
+### venv and requirements.txt
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+# Search Europe PMC's bioRxiv index
+python main.py search "single-cell" --limit 5
+
+# Fetch authoritative metadata from bioRxiv by DOI
+python main.py detail 10.1101/2026.01.01.123456
+
+# Use another cache location
 python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
 ```
 

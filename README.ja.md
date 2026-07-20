@@ -22,48 +22,40 @@ English: [README.md](README.md)
 
 ## 使い方
 
-次のセットアップ方法から1つを選び、対応するコマンドで実行してください。
+次のセットアップ方法から1つを選んでください。
 
-### uv を使う場合
+### uv
 
 ```bash
 uv sync
-```
-
-### venv と requirements.txt を使う場合
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-uv を使う場合:
-
-```bash
 
 # Europe PMC の bioRxiv インデックスを検索
 uv run python main.py search "single-cell" --limit 5
 
 # DOI から bioRxiv 公式 API の詳細情報を取得
 uv run python main.py detail 10.1101/2026.01.01.123456
-```
-
-venv を使う場合:
-
-```bash
-python main.py search "single-cell" --limit 5
-python main.py detail 10.1101/2026.01.01.123456
-```
 
 CLI は短期間のレスポンスを `.biorxiv-searcher.sqlite3` にキャッシュします。保存先を変更する場合は `--cache PATH` を指定してください。
 
 ```bash
-# uv
 uv run python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
+```
 
-# venv
+### venv と requirements.txt
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+# Europe PMC の bioRxiv インデックスを検索
+python main.py search "single-cell" --limit 5
+
+# DOI から bioRxiv 公式 API の詳細情報を取得
+python main.py detail 10.1101/2026.01.01.123456
+
+# キャッシュ保存先を変更
 python main.py search "protein folding" --cache /tmp/biorxiv-searcher.sqlite3
 ```
 
